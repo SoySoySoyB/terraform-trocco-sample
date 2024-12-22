@@ -1,0 +1,108 @@
+formatter: markdown
+
+sections:
+  show:
+    - data-sources
+    - header
+    - footer
+    - inputs
+    - modules
+    - outputs
+    - providers
+    - requirements
+    - resources
+
+content: |-
+  {{ .Header }}
+
+  {{- if .Module.Requirements }}
+    {{- indent 0 "#" }} Requirements
+
+  | Name | Version |
+  | ---- | ------- |
+    {{- range .Module.Requirements }}
+  | {{ .Name }} | {{ .Version }} |
+    {{- end }}
+
+  {{ end }}
+
+
+  {{- if .Module.Providers }}
+    {{- indent 0 "#" }} Providers
+
+  | Name | Version | Alias |
+  | ---- | ------- | ----- |
+    {{- range .Module.Providers }}
+  | {{ .FullName }} | {{ tostring .Version | default "n/a" }} | {{ tostring .Alias | default "n/a"}} |
+    {{- end }}
+
+  {{ end }}
+
+
+  {{- if .Module.Inputs }}
+    {{- indent 0 "#" }} Inputs
+
+  | Name | description | Type | Required | Default | File |
+  | ---- | ----------- | ---- | -------- | ------- | ---- |
+    {{- range .Module.Inputs }}
+  | {{ .Name }} | {{ .Description }} | `{{ tostring .Type | default "n/a" }}` | {{ if .Required }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | {{ printf "%s" .GetValue | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) |
+    {{- end }}
+
+  {{ end }}
+
+
+  {{- if .Module.ModuleCalls }}
+    {{- indent 0 "#" }} Modules
+
+  | Name | Source | Version | File | Comment |
+  | ---- | ------ | ------- | ---- | ------- |
+    {{- range .Module.ModuleCalls }}
+  | {{ .Name }} | [{{ .Source }}]({{ .Source }}) | {{ printf "%s" .Version | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) | {{ printf "%s" .Description | default "n/a" }} 
+    {{- end }}
+
+  {{ end }}
+
+
+  {{- if .Module.Resources }}
+    {{- indent 0 "#" }} Resources
+
+  | Type | Name | File | Comment |
+  | ------------ | ---- | ---- | ------- |
+    {{- range .Module.Resources }}
+  | {{ .GetMode }} | [{{ .Spec }}]{{ if .URL }}({{ .URL }}){{ else }}(https://registry.terraform.io/providers/{{ .ProviderSource | replace "registry.terraform.io/" "" }}/{{ .Version }}/docs/){{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) | {{ .Description }} |  
+    {{- end }}
+
+  {{ end }}
+
+
+  {{- if .Module.Outputs }}
+    {{- indent 0 "#" }} Outputs
+
+  | Name | Description | isSensitive | File |
+  | ---- | ----------- | ----------- | ---- |
+    {{- range .Module.Outputs }}
+  | {{ .Name }} | {{ .Description }} | {{ if .Sensitive }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) |
+    {{- end }}
+
+  {{ end }}
+
+  {{- .Footer }}
+
+settings:
+  default: true
+  description: true
+  escape: true
+  hide-empty: true
+  lockfile: true
+  read-comments: true
+  required: true
+  sensitive: true
+  type: true
+
+sort:
+  enabled: true
+  by: name
+
+output:
+  file: README.md
+  mode: inject

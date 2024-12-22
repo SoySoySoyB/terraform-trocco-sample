@@ -1,0 +1,96 @@
+# PRのマージに伴ってApplyを実行する
+
+name: terraform-apply
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - sample2_intermediate/google/**/*.tf
+      - sample2_intermediate/trocco/**/*.tf
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  actions: read # artifactを取得するために必要
+
+env:
+  # 各種の値を記載する
+  # プロジェクトIDは次で確認可能 https://console.cloud.google.com/home/dashboard
+  WORKLOAD_IDENTITY_PROJECT_ID: {YOUR_WORKLOAD_IDENTITY_PROJECT_ID}
+  WORKLOAD_IDENTITY_PROJECT_NUMBER: {YOUR_WORKLOAD_IDENTITY_PROJECT_NUMBER}
+  WORKLOAD_IDENTITY_POOL_ID: github-actions
+  WORKLOAD_IDENTITY_POOL_PROVIDER_ID: {YOUR_WORKLOAD_IDENTITY_POOL_PROVIDER_ID}
+  GOOGLE_SERVICE_ACCOUNT_APPLY: github-actions-tfaction-apply@{YOUR_GOOGLE_SERVICE_ACCOUNT_PROJECT_ID}.iam.gserviceaccount.com
+
+jobs:
+  # plan.yamlと同様にsetupで変更のあった作業ディレクトリを取得し、outputsで出力する
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.list-targets.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      # aquaを使って必要なツールをインストールする
+      - uses: aquaproj/aqua-installer@v3.1.0
+        with:
+          aqua_version: v2.38.4
+
+      # 変更のあった作業ディレクトリを取得する
+      - uses: suzuki-shunsuke/tfaction/list-targets@v1.13.1
+        id: list-targets
+
+  # setupで取得した変更のある作業ディレクトリを並列に実行する
+  apply:
+    name: "terraform apply (${{ matrix.target.target }})"
+    runs-on: ${{ matrix.target.runs_on }}
+    needs: setup
+
+    # setupで取得した変更のある作業ディレクトリが空の場合は実行しない
+    if: join(fromJSON(needs.setup.outputs.targets), '') != ''
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.setup.outputs.targets) }}
+    env:
+      TFACTION_IS_APPLY: "true" # applyする場合は"true"に指定
+      TFACTION_TARGET: ${{ matrix.target.target }}
+      TFACTION_WORKING_DIR: ${{ matrix.target.working_directory }}
+      TFACTION_JOB_TYPE: ${{ matrix.target.job_type }}
+      # 事前にリポジトリのSettings > Secrets and variables > Actionsで設定しておく
+      TROCCO_API_KEY: ${{ secrets.TROCCO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: aquaproj/aqua-installer@v3.1.0
+        with:
+          aqua_version: v2.38.4
+
+      # GitHub Appのトークンを取得する
+      - id: github_app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          # 事前にGitHub Appを作成し、リポジトリのSettings > Secrets and variables > Actionsで設定しておく
+          app-id: ${{ secrets.TERRAFORM_APP_ID }}
+          private-key: ${{ secrets.TERRAFORM_APP_PRIVATE_KEY }}
+
+      # Google CloudとWorkload Identityで認証する
+      - id: google_cloud_workload_identity_auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.WORKLOAD_IDENTITY_PROJECT_ID }}
+          workload_identity_provider: projects/${{ env.WORKLOAD_IDENTITY_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ env.WORKLOAD_IDENTITY_POOL_ID }}/providers/${{ env.WORKLOAD_IDENTITY_POOL_PROVIDER_ID }}
+          service_account: ${{ env.GOOGLE_SERVICE_ACCOUNT_APPLY }}
+
+      # terraform initなどの準備を行う
+      - uses: suzuki-shunsuke/tfaction/setup@v1.13.1
+        with:
+          github_token: ${{ steps.github_app_token.outputs.token }}
+
+      # terraform applyを実行する
+      - uses: suzuki-shunsuke/tfaction/apply@v1.13.1
+        with:
+          github_token: ${{ steps.github_app_token.outputs.token }}

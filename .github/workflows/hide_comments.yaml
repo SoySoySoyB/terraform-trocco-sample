@@ -1,0 +1,32 @@
+# 過去のコメントを閉じてConversationを見やすくする
+
+name: hide-comments
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - sample2_intermediate/google/**/*.tf
+      - sample2_intermediate/trocco/**/*.tf
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  run-github-comment-hide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: aquaproj/aqua-installer@v3.1.0
+        with:
+          aqua_version: v2.38.4
+      - id: github_app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TERRAFORM_APP_ID }}
+          private-key: ${{ secrets.TERRAFORM_APP_PRIVATE_KEY }}
+      - run: github-comment exec -- github-comment hide
+        env:
+          GITHUB_TOKEN: ${{ steps.github_app_token.outputs.token }}

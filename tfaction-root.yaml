@@ -1,0 +1,21 @@
+plan_workflow_name: terraform-plan
+
+# tfsecはTrivyに統合されており、trivyの利用が推奨されている
+# ref: https://zenn.dev/shunsuke_suzuki/articles/tfaction-support-trivy
+tfsec:
+  enabled: false
+trivy:
+  enabled: true
+
+# v1.13.1からtflintのfixに対応
+# ref: https://github.com/suzuki-shunsuke/tfaction/releases/tag/v1.13.1
+tflint:
+  enabled: true
+  fix: true
+
+# ここで指定したディレクトリに対してtfactionが実行される
+target_groups:
+  - working_directory: sample2_intermediate/google
+    target: sample2_intermediate/google
+  - working_directory: sample2_intermediate/trocco
+    target: sample2_intermediate/trocco

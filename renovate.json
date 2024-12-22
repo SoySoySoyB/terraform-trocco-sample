@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "github>aquaproj/aqua-renovate-config#2.6.0"
+  ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "labels": [
+    "renovate"
+  ],
+  "packageRules": [
+    {
+      "matchFileNames": [
+        "**/*provider.tf",
+        "**/*versions.tf"
+      ],
+      "groupName": "terraform-provider",
+      "commitMessagePrefix": "[Renovate][Terraform Provider]",
+      "minimumReleaseAge": "7 days",
+      "automerge": false
+    },
+    {
+      "matchFileNames": [
+        "**/*aqua.yaml"
+      ],
+      "groupName": "aqua",
+      "commitMessagePrefix": "[Renovate][aqua]",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchPackageNames": ["hashicorp/terraform"],
+      "groupName": "terraform",
+      "commitMessagePrefix": "[Renovate][Terraform]",
+      "minimumReleaseAge": "7 days",
+      "automerge": false
+    },
+    {
+      "matchFileNames": [
+        ".github/workflows/**.yaml"
+      ],
+      "groupName": "github-actions",
+      "commitMessagePrefix": "[Renovate][GHA]",
+      "minimumReleaseAge": "7 days"
+    }
+  ],
+  "schedule": [
+    "after 10pm and before 5am every weekday"
+  ],
+  "prHourlyLimit": 0,
+  "timezone": "Asia/Tokyo"
+}

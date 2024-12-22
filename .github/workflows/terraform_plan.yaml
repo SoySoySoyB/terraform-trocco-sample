@@ -1,0 +1,132 @@
+# PRに対して各種の処理を行う
+
+name: terraform-plan
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - sample2_intermediate/google/**/*.tf
+      - sample2_intermediate/trocco/**/*.tf
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  # 各種の値を記載する
+  # プロジェクトIDは次で確認可能 https://console.cloud.google.com/home/dashboard
+  WORKLOAD_IDENTITY_PROJECT_ID: {YOUR_WORKLOAD_IDENTITY_PROJECT_ID}
+  WORKLOAD_IDENTITY_PROJECT_NUMBER: {YOUR_WORKLOAD_IDENTITY_PROJECT_NUMBER}
+  WORKLOAD_IDENTITY_POOL_ID: github-actions
+  WORKLOAD_IDENTITY_POOL_PROVIDER_ID: {YOUR_WORKLOAD_IDENTITY_POOL_PROVIDER_ID}
+  GOOGLE_SERVICE_ACCOUNT_TERRAFORM_PLAN: github-actions-tfaction-plan@{YOUR_GOOGLE_SERVICE_ACCOUNT_PROJECT_ID}.iam.gserviceaccount.com
+
+jobs:
+  # setupで変更のあった作業ディレクトリを取得する
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.list-targets.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      # aquaを使って必要なツールをインストールする
+      - uses: aquaproj/aqua-installer@v3.1.0
+        with:
+          aqua_version: v2.38.4
+
+      # 変更のあった作業ディレクトリを取得する
+      - uses: suzuki-shunsuke/tfaction/list-targets@v1.13.1
+        id: list-targets
+
+  # setupで取得した変更のある作業ディレクトリを並列に実行する
+  plan:
+    name: "terraform plan (${{ matrix.target.target }})"
+    runs-on: ${{ matrix.target.runs_on }}
+    needs: setup
+
+    # setupで取得した変更のある作業ディレクトリが空の場合は実行しない
+    if: join(fromJSON(needs.setup.outputs.targets), '') != ''
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.setup.outputs.targets) }}
+    concurrency: ${{matrix.target.target}}
+    env:
+      TFACTION_TARGET: ${{ matrix.target.target }}
+      TFACTION_JOB_TYPE: terraform
+      # 事前にリポジトリのSettings > Secrets and variables > Actionsで設定しておく
+      TROCCO_API_KEY: ${{ secrets.TROCCO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: aquaproj/aqua-installer@v3.1.0
+        with:
+          aqua_version: v2.38.4
+
+      # GitHub Appのトークンを取得する
+      - id: github_app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          # 事前にGitHub Appを作成し、リポジトリのSettings > Secrets and variables > Actionsで設定しておく
+          app-id: ${{ secrets.TERRAFORM_APP_ID }}
+          private-key: ${{ secrets.TERRAFORM_APP_PRIVATE_KEY }}
+
+      # Google CloudとWorkload Identityで認証する
+      - id: google_cloud_workload_identity_auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.WORKLOAD_IDENTITY_PROJECT_ID }}
+          workload_identity_provider: projects/${{ env.WORKLOAD_IDENTITY_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ env.WORKLOAD_IDENTITY_POOL_ID }}/providers/${{ env.WORKLOAD_IDENTITY_POOL_PROVIDER_ID }}
+          service_account: ${{ env.GOOGLE_SERVICE_ACCOUNT_TERRAFORM_PLAN }}
+
+      # terraform initなどの準備を行う
+      - uses: suzuki-shunsuke/tfaction/setup@v1.13.1
+        with:
+          github_token: ${{ steps.github_app_token.outputs.token }}
+
+      # Lintや脆弱性チェック（terraform validate, conftest, trivy, tflint, terraform fmt）
+      - uses: suzuki-shunsuke/tfaction/test@v1.13.1
+        with:
+          github_token: ${{ steps.github_app_token.outputs.token }}
+      
+      # 既存リソースのREADME.mdの生成
+      - name: terraform-docs
+        env:
+          GITHUB_TOKEN: "${{ steps.github_app_token.outputs.token }}"
+        # tfactionでもterraform-docsは実行できるが、modules側でファイルを上手く生成できなかったのでシェルで手組みしている
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          terraform-docs "${{ env.TFACTION_TARGET }}"
+          git add "${{ env.TFACTION_TARGET }}/README.md"
+          if git diff --cached --name-only origin/main | grep -q "${{ env.TFACTION_TARGET }}/README.md"; then
+            ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+              -m "commit terraform-docs generated document ${{ env.TFACTION_TARGET }}/README.md" \
+              -C ${{ github.workspace }} "${{ env.TFACTION_TARGET }}/README.md"
+          fi
+          
+          if test -d "./${{ env.TFACTION_TARGET }}/modules"; then
+            if git diff --cached --name-only origin/main | grep -q "${{ env.TFACTION_TARGET }}/modules/"; then
+              for directory in ${{ env.TFACTION_TARGET }}/modules/*; do
+                terraform-docs "$directory"
+                git add "$directory/README.md"
+                if git diff --cached --name-only origin/main | grep -q "$directory/README.md"; then
+                  ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+                    -m "commit terraform-docs generated document $directory/README.md" \
+                    -C ${{ github.workspace }} "$directory/README.md"
+                fi
+              done
+            fi
+          fi
+
+      # terraform planを実行して、結果をコメントに記載する
+      - uses: suzuki-shunsuke/tfaction/plan@v1.13.1
+        with:
+          github_token: ${{ steps.github_app_token.outputs.token }}
