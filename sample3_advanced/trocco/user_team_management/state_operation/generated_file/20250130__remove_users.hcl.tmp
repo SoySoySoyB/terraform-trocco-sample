@@ -1,0 +1,9 @@
+# tfmigrateでユーザーをまとめてremoveするための定義；ファイル名末尾の.tmpを削除してtfmigrateディレクトリに配置することで処理可能になる
+migration "state" "remove_users" {
+  actions = [
+    "rm trocco_user.users[\\\"your.mail+dummy1@example.com\\\"]",
+    "rm trocco_user.users[\\\"your.mail+dummy2@example.com\\\"]",
+    "rm trocco_user.users[\\\"your.mail+dummy3@example.com\\\"]",
+    "rm trocco_user.users[\\\"your.mail+dummy4@example.com\\\"]",
+  ]
+}

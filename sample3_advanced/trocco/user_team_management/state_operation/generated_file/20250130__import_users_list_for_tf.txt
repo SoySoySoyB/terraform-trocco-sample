@@ -1,0 +1,18 @@
+  # ユーザー取込時に定義に差分が出ないようにするため、権限ごとのユーザー一覧を生成；locals部分に記載する
+  imported_users = [
+    "your.mail+dummy1@example.com",  # 1
+    "your.mail+dummy2@example.com",  # 2
+    "your.mail+dummy3@example.com",  # 3
+    "your.mail+dummy4@example.com",  # 4
+  ]
+  imported_super_admin_user = [
+    "your.mail+dummy1@example.com",  # 1
+  ]
+  imported_admin_users = [
+    "your.mail+dummy2@example.com",  # 2
+  ]
+  imported_connection_modify_not_restricted_users = [
+    "your.mail+dummy1@example.com",  # 1
+    "your.mail+dummy2@example.com",  # 2
+    "your.mail+dummy3@example.com",  # 3
+  ]

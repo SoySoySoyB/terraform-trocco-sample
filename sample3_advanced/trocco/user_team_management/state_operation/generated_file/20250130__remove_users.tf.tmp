@@ -1,0 +1,28 @@
+# removedブロックでユーザーをまとめてremoveするための定義；terraformのルートディレクトリに配置し、処理後に別フォルダに移管する
+removed {
+  from = trocco_user.users["your.mail+dummy1@example.com"]
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = trocco_user.users["your.mail+dummy2@example.com"]
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = trocco_user.users["your.mail+dummy3@example.com"]
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = trocco_user.users["your.mail+dummy4@example.com"]
+  lifecycle {
+    destroy = false
+  }
+}

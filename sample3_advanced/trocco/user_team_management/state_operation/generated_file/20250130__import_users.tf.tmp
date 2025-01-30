@@ -1,0 +1,20 @@
+# importブロックでユーザーをまとめてimportするための定義；terraformのルートディレクトリに配置し、処理後に別フォルダに移管する
+import {
+  to = trocco_user.users["your.mail+dummy1@example.com"]
+  id = 1
+}
+
+import {
+  to = trocco_user.users["your.mail+dummy2@example.com"]
+  id = 2
+}
+
+import {
+  to = trocco_user.users["your.mail+dummy3@example.com"]
+  id = 3
+}
+
+import {
+  to = trocco_user.users["your.mail+dummy4@example.com"]
+  id = 4
+}
