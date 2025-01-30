@@ -4,7 +4,8 @@ module "account_management" {
   providers = {
     trocco = trocco
   }
-  your_email = local.your_email
+  sample_version = local.sample_version
+  your_email     = local.your_email
 }
 
 # 接続情報
@@ -13,8 +14,9 @@ module "connection" {
   providers = {
     trocco = trocco
   }
-  google    = local.google
-  snowflake = local.snowflake
+  sample_version = local.sample_version
+  google         = local.google
+  snowflake      = local.snowflake
 }
 
 # 転送設定
@@ -24,6 +26,7 @@ module "transfer" {
   providers = {
     trocco = trocco
   }
+  sample_version        = local.sample_version
   bigquery_connections  = module.connection.bigquery_connections
   snowflake_connections = module.connection.bigquery_connections
 }
@@ -35,6 +38,7 @@ module "datamart" {
   providers = {
     trocco = trocco
   }
+  sample_version        = local.sample_version
   bigquery_connections  = module.connection.bigquery_connections
   snowflake_connections = module.connection.bigquery_connections
 }

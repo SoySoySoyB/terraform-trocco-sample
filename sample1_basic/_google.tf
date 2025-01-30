@@ -19,8 +19,8 @@
 # Identity and Access Management (IAM) API: iam.googleapis.com
 resource "google_service_account" "trocco" {
   project      = local.google.project_id
-  account_id   = "trocco-sample"
-  display_name = "TROCCO Sample"
+  account_id   = "trocco-${local.sample_version}"
+  display_name = "TROCCO ${local.sample_version}"
   description  = "TROCCOの接続で利用するためのサービスアカウント"
 }
 
@@ -40,7 +40,7 @@ resource "google_service_account_key" "trocco" {
 # BigQuery API: bigquery.googleapis.com
 resource "google_bigquery_dataset" "dl_trocco_sample" {
   project     = local.google.project_id
-  dataset_id  = "dl_trocco_sample"
+  dataset_id  = "dl_trocco_${local.sample_version}"
   location    = local.google.default_location
   description = "データレイク層のテーブルを作成するためのデータセット"
 }
@@ -49,7 +49,7 @@ resource "google_bigquery_dataset" "dl_trocco_sample" {
 # BigQuery API: bigquery.googleapis.com
 resource "google_bigquery_dataset" "dm_trocco_sample" {
   project     = local.google.project_id
-  dataset_id  = "dm_trocco_sample"
+  dataset_id  = "dm_trocco_${local.sample_version}"
   location    = local.google.default_location
   description = "データマート層のテーブルを作成するためのデータセット"
 }

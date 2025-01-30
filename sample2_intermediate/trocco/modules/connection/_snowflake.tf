@@ -1,7 +1,7 @@
 # 秘密鍵はGUIで登録する
 resource "trocco_connection" "snowflake_sample" {
   connection_type = "snowflake"
-  name            = var.snowflake.account_id
+  name            = "${var.sample_version}_${var.snowflake.account_id}"
   description     = "アカウントID: ${var.snowflake.account_id}に対する接続情報"
   host            = var.snowflake.host
   auth_method     = "key_pair"
@@ -12,7 +12,7 @@ resource "trocco_connection" "snowflake_sample" {
 
 resource "trocco_connection" "snowflake_sample2" {
   connection_type = "snowflake"
-  name            = "${var.snowflake.account_id}2"
+  name            = "${var.sample_version}_${var.snowflake.account_id}2"
   description     = "アカウントID: ${var.snowflake.account_id}2に対する接続情報"
   host            = "${var.snowflake.host}2"
   auth_method     = "key_pair"

@@ -62,7 +62,7 @@ jobs:
     concurrency: ${{matrix.target.target}}
     env:
       TFACTION_TARGET: ${{ matrix.target.target }}
-      TFACTION_JOB_TYPE: terraform
+      TFACTION_JOB_TYPE: ${{ matrix.target.job_type }}
       # 事前にリポジトリのSettings > Secrets and variables > Actionsで設定しておく
       TROCCO_API_KEY: ${{ secrets.TROCCO_API_KEY }}
     steps:
@@ -103,27 +103,51 @@ jobs:
           GITHUB_TOKEN: "${{ steps.github_app_token.outputs.token }}"
         # tfactionでもterraform-docsは実行できるが、modules側でファイルを上手く生成できなかったのでシェルで手組みしている
         run: |
+          set -euo pipefail
           git fetch origin ${{ github.base_ref }} --depth=1
-          terraform-docs "${{ env.TFACTION_TARGET }}"
-          git add "${{ env.TFACTION_TARGET }}/README.md"
-          if git diff --cached --name-only origin/main | grep -q "${{ env.TFACTION_TARGET }}/README.md"; then
-            ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
-              -m "commit terraform-docs generated document ${{ env.TFACTION_TARGET }}/README.md" \
-              -C ${{ github.workspace }} "${{ env.TFACTION_TARGET }}/README.md"
+          has_commit_documents=false
+
+          # generate root terraform-docs
+          root_docs_file_is_none=false
+          if ! test -f "${{ env.TFACTION_WORKING_DIR }}/README.md"; then
+            root_docs_file_is_none=true
           fi
-          
-          if test -d "./${{ env.TFACTION_TARGET }}/modules"; then
-            if git diff --cached --name-only origin/main | grep -q "${{ env.TFACTION_TARGET }}/modules/"; then
-              for directory in ${{ env.TFACTION_TARGET }}/modules/*; do
+          terraform-docs "${{ env.TFACTION_WORKING_DIR }}"
+          git add "${{ env.TFACTION_WORKING_DIR }}/README.md"
+          if $root_docs_file_is_none || git diff --cached --name-only | grep -q "${{ env.TFACTION_WORKING_DIR }}/README.md"; then
+            ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+              -m "[skip ci] commit terraform-docs generated document ${{ env.TFACTION_WORKING_DIR }}/README.md" \
+              -C ${{ github.workspace }} "${{ env.TFACTION_WORKING_DIR }}/README.md"
+            has_commit_documents=true
+          fi
+
+          # generate module terraform-docs
+          if test -d "./${{ env.TFACTION_WORKING_DIR }}/modules"; then
+            if git diff --cached --name-only | grep -q "${{ env.TFACTION_WORKING_DIR }}/modules/"; then
+              for directory in ${{ env.TFACTION_WORKING_DIR }}/modules/*; do
+                module_docs_file_is_none=false
+                if ! test -f "$directory/README.md"; then
+                  module_docs_file_is_none=true
+                fi
                 terraform-docs "$directory"
                 git add "$directory/README.md"
-                if git diff --cached --name-only origin/main | grep -q "$directory/README.md"; then
+                if $module_docs_file_is_none || git diff --cached --name-only  | grep -q "$directory/README.md"; then
                   ghcp commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
-                    -m "commit terraform-docs generated document $directory/README.md" \
+                    -m "[skip ci] commit terraform-docs generated document $directory/README.md" \
                     -C ${{ github.workspace }} "$directory/README.md"
+                  has_commit_documents=true
                 fi
               done
             fi
+          fi
+
+          # commit and exit to plan properly
+          # ref: https://int128.hatenablog.com/entry/2019/03/19/133950
+          # ref: https://zenn.dev/shunsuke_suzuki/articles/ghcp-create-commit-github-api
+          if $has_commit_documents; then
+            ghcp empty-commit -r "$GITHUB_REPOSITORY" -b "$GITHUB_HEAD_REF" \
+              -m "documents have commited to ${{ env.TFACTION_WORKING_DIR }}"
+            exit 1
           fi
 
       # terraform planを実行して、結果をコメントに記載する

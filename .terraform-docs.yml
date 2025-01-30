@@ -45,7 +45,7 @@ content: |-
   | Name | description | Type | Required | Default | File |
   | ---- | ----------- | ---- | -------- | ------- | ---- |
     {{- range .Module.Inputs }}
-  | {{ .Name }} | {{ .Description }} | `{{ tostring .Type | default "n/a" }}` | {{ if .Required }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | {{ printf "%s" .GetValue | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) |
+  | {{ .Name }} | {{ .Description }} | `{{ tostring .Type | default "n/a" }}` | {{ if .Required }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | {{ printf "%s" .GetValue | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}) |
     {{- end }}
 
   {{ end }}
@@ -57,7 +57,7 @@ content: |-
   | Name | Source | Version | File | Comment |
   | ---- | ------ | ------- | ---- | ------- |
     {{- range .Module.ModuleCalls }}
-  | {{ .Name }} | [{{ .Source }}]({{ .Source }}) | {{ printf "%s" .Version | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) | {{ printf "%s" .Description | default "n/a" }} 
+  | {{ .Name }} | [{{ .Source }}]({{ .Source }}) | {{ printf "%s" .Version | default "n/a" }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}) | {{ printf "%s" .Description | default "n/a" }} 
     {{- end }}
 
   {{ end }}
@@ -69,7 +69,7 @@ content: |-
   | Type | Name | File | Comment |
   | ------------ | ---- | ---- | ------- |
     {{- range .Module.Resources }}
-  | {{ .GetMode }} | [{{ .Spec }}]{{ if .URL }}({{ .URL }}){{ else }}(https://registry.terraform.io/providers/{{ .ProviderSource | replace "registry.terraform.io/" "" }}/{{ .Version }}/docs/){{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) | {{ .Description }} |  
+  | {{ .GetMode }} | [{{ .Spec }}]{{ if .URL }}({{ .URL }}){{ else }}(https://registry.terraform.io/providers/{{ .ProviderSource | replace "registry.terraform.io/" "" }}/{{ .Version }}/docs/){{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}) | {{ .Description }} |  
     {{- end }}
 
   {{ end }}
@@ -81,7 +81,7 @@ content: |-
   | Name | Description | isSensitive | File |
   | ---- | ----------- | ----------- | ---- |
     {{- range .Module.Outputs }}
-  | {{ .Name }} | {{ .Description }} | {{ if .Sensitive }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}#L{{ .Position.Line }}) |
+  | {{ .Name }} | {{ .Description }} | {{ if .Sensitive }}{{ "yes" }}{{ else }}{{ "no" }}{{ end }} | [{{ .Position.Filename | replace "\\" "/" }}](/{{ .Position.Filename | replace "\\" "/" }}) |
     {{- end }}
 
   {{ end }}

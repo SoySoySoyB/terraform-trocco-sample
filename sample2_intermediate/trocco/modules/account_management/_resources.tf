@@ -14,52 +14,52 @@ locals {
   # 参考までにsample1よりも複雑な構成にしている
   your_email_before_at = split("@", var.your_email)[0]
   your_email_domain    = split("@", var.your_email)[1]
-  super_admin          = "${local.your_email_before_at}+super_admin@${local.your_email_domain}"
+  super_admin          = "${local.your_email_before_at}+${var.sample_version}_super_admin@${local.your_email_domain}"
   departments = {
     marketing = {
       managers = [
-        "${local.your_email_before_at}+marketing__manager@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_marketing__manager@${local.your_email_domain}"
       ],
       members = [
-        "${local.your_email_before_at}+marketing__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_marketing__member@${local.your_email_domain}"
       ]
     },
     sales = {
       managers = [
-        "${local.your_email_before_at}+sales__manager@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_sales__manager@${local.your_email_domain}"
       ],
       members = [
-        "${local.your_email_before_at}+sales__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_sales__member@${local.your_email_domain}"
       ]
     },
     product = {
       managers = [
-        "${local.your_email_before_at}+product__manager@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_product__manager@${local.your_email_domain}"
       ],
       members = [
-        "${local.your_email_before_at}+product__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_product__member@${local.your_email_domain}"
       ]
     },
     corporate = {
       managers = [
-        "${local.your_email_before_at}+corporate__manager@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_corporate__manager@${local.your_email_domain}"
       ],
       members = [
-        "${local.your_email_before_at}+corporate__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_corporate__member@${local.your_email_domain}"
       ]
     },
     data_management = {
       managers = [
-        "${local.your_email_before_at}+data_management__manager@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_data_management__manager@${local.your_email_domain}"
       ],
       members = [
-        "${local.your_email_before_at}+data_management__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_data_management__member@${local.your_email_domain}"
       ]
     },
     technical_admins = {
       managers = [],
       members = [
-        "${local.your_email_before_at}+technical_admin__member@${local.your_email_domain}"
+        "${local.your_email_before_at}+${var.sample_version}_technical_admin__member@${local.your_email_domain}"
       ]
     }
   }

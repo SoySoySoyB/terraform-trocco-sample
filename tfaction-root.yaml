@@ -19,3 +19,5 @@ target_groups:
     target: sample2_intermediate/google
   - working_directory: sample2_intermediate/trocco
     target: sample2_intermediate/trocco
+  - working_directory: sample3_advanced/trocco/user_team_management
+    target: sample3/trocco/user_team_management

@@ -3,6 +3,7 @@
 */
 
 locals {
+  sample_version = "sample2"
   google = {
     sample_project_id                 = "{YOUR_SAMPLE_PROJECT_ID}"
     default_location                  = "asia-northeast1"
