@@ -25,3 +25,14 @@ tfactionを中心とした、CI／CDについてまとめています。
 - 管理リソースのドキュメント自動生成
 
 [GitHub Actionsを月2,000分動かして学んだTerraform + TROCCO入門　後半：GitHub ActionsでのCI／CD](https://qiita.com/SoySoySoyB/items/05e4d31d3e372790c775)
+
+## sample3_advanced
+
+ひとまずユーザー／チーム管理についてまとめています。
+
+- ユーザーの新規作成
+- 部門に応じた権限管理／チームへの登録
+- ユーザーの部門変更
+- 既存ユーザーの取り込み
+
+[続・Terraform + TROCCO入門　その1: tfmigrateによる既存取込も含めたユーザー／チームの堅牢な管理](https://qiita.com/SoySoySoyB/items/4f64e6dfcf028fae9140)
