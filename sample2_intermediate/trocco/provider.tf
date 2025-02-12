@@ -2,7 +2,7 @@ terraform {
   required_providers {
     trocco = {
       source  = "registry.terraform.io/trocco-io/trocco"
-      version = "0.2.1"
+      version = "0.6.0"
     }
   }
   # バックエンドとして作成したバケットを指定する

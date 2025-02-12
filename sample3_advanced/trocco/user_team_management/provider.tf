@@ -2,7 +2,7 @@ terraform {
   required_providers {
     trocco = {
       source  = "registry.terraform.io/trocco-io/trocco"
-      version = "0.5.0"
+      version = "0.6.0"
     }
     random = {
       source  = "hashicorp/random"
