@@ -38,12 +38,12 @@ jobs:
       - uses: actions/checkout@v4.2.2
 
       # aquaを使って必要なツールをインストールする
-      - uses: aquaproj/aqua-installer@v3.1.0
+      - uses: aquaproj/aqua-installer@v3.1.1
         with:
-          aqua_version: v2.38.4
+          aqua_version: v2.43.2
 
       # 変更のあった作業ディレクトリを取得する
-      - uses: suzuki-shunsuke/tfaction/list-targets@v1.13.1
+      - uses: suzuki-shunsuke/tfaction/list-targets@v1.15.3
         id: list-targets
 
   # setupで取得した変更のある作業ディレクトリを並列に実行する
@@ -67,9 +67,9 @@ jobs:
       TROCCO_API_KEY: ${{ secrets.TROCCO_API_KEY }}
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: aquaproj/aqua-installer@v3.1.0
+      - uses: aquaproj/aqua-installer@v3.1.1
         with:
-          aqua_version: v2.38.4
+          aqua_version: v2.43.2
 
       # GitHub Appのトークンを取得する
       - id: github_app_token
@@ -88,12 +88,12 @@ jobs:
           service_account: ${{ env.GOOGLE_SERVICE_ACCOUNT_TERRAFORM_PLAN }}
 
       # terraform initなどの準備を行う
-      - uses: suzuki-shunsuke/tfaction/setup@v1.13.1
+      - uses: suzuki-shunsuke/tfaction/setup@v1.15.3
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
 
       # Lintや脆弱性チェック（terraform validate, conftest, trivy, tflint, terraform fmt）
-      - uses: suzuki-shunsuke/tfaction/test@v1.13.1
+      - uses: suzuki-shunsuke/tfaction/test@v1.15.3
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
       
@@ -151,6 +151,6 @@ jobs:
           fi
 
       # terraform planを実行して、結果をコメントに記載する
-      - uses: suzuki-shunsuke/tfaction/plan@v1.13.1
+      - uses: suzuki-shunsuke/tfaction/plan@v1.15.3
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
