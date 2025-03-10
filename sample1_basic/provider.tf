@@ -3,15 +3,15 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "6.14.0"
+      version = "6.24.0"
     }
     trocco = {
       source  = "registry.terraform.io/trocco-io/trocco"
-      version = "0.2.1"
+      version = "0.9.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.3"
+      version = "3.7.1"
     }
   }
   # バケット作成後にコメントアウトを外すと、stateファイルをGCSで管理できる
